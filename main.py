@@ -1,16 +1,39 @@
 #FTA Database Code
 
+import os
 import json
 import csv
 import numpy as np
+import pylatex
 import matplotlib.pyplot as plt
 
+from pylatex import Document, Section, Subsection, Command, Figure
+from pylatex.utils import italic, NoEscape
 from matplotlib.path import Path
 from matplotlib.spines import Spine
 from matplotlib.projections.polar import PolarAxes
 from matplotlib.projections import register_projection
-
 from calculation import Calculation
+
+#Create LaTeX document
+def createDocument(filename, results):
+    doc = Document('full')
+    imageFilename = os.path.join(os.path.dirname(__file__), 'plots/Janet_Meier.png')
+    with doc.create(Section('Fitnesstest Feuerwehr XY aktuelles Jahr')):
+        doc.append('Name')
+        doc.append(italic('italic text. '))
+
+        with doc.create(Subsection('Resultate des neusten Fitnesstests')):
+            doc.append('Standweitsprung and then some more')
+
+        with doc.create(Subsection('Spider Diagramm')):
+            with doc.create(Figure(position = 'h!')) as diagram:
+                diagram.add_image(imageFilename, width = '120px')
+                diagram.add_caption('1 = Ungenügend, 2 = Genügend, 3 = Gut, 4 = Sehr gut, 5 = Hervorranged')
+
+    #doc.generate_pdf(clean_tex=False)
+    #doc.generate_tex()
+    print(doc.dumps())
 
 #Import data from csvfile
 def dataImport(filename):
@@ -25,14 +48,13 @@ def dataImport(filename):
 def main():
     calculation = Calculation()
     testData = dataImport('TestData.csv')
+    createDocument(None,None)
 
     for data in testData:
         age = calculation.calcAge(data['testDate'], data['dateOfBirth'])
         print('\n\n' + data['name'] + ' ' + data['surname'] + ' ' + str(age))
-        '''bmi = calculation.calcBmi(data['weight'], data['height'])
-        print(bmi)
+        bmi = calculation.calcBmi(data['weight'], data['height'])
         wtoh = calculation.calcWToH(data['waist'], data['height'])
-        print(wtoh)'''
         ols = calculation.calcOls(data['olsR'], data['olsL'])
         scorePerO = calculation.calcScorePer(data['gender'], age, data['perO'], 'perO')
         scorePerI = calculation.calcScorePer(data['gender'], age, data['perI'], 'perI')
