@@ -24,7 +24,7 @@ def createDocument(filename, results):
         doc.append(italic('italic text. '))
 
         with doc.create(Subsection('Resultate des neusten Fitnesstests')):
-            doc.append('Standweitsprung and then some more')
+            doc.append('Standweitsprung: ' + results['bmi'] )
 
         with doc.create(Subsection('Spider Diagramm')):
             with doc.create(Figure(position = 'h!')) as diagram:
@@ -48,7 +48,11 @@ def dataImport(filename):
 def main():
     calculation = Calculation()
     testData = dataImport('TestData.csv')
-    createDocument(None,None)
+    testResults = {
+        'bmi': '25',
+        'age': '23'
+    }
+    createDocument(None,testResults)
 
     for data in testData:
         age = calculation.calcAge(data['testDate'], data['dateOfBirth'])
