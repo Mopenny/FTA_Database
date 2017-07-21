@@ -23,11 +23,11 @@ class Calculation(object):
         return age
 
     def calcBmi(self, weight, height):
-        bmi = weight/((height/100)**2)
+        bmi = float(weight)/((float(height)/100)**2)
         return bmi
 
     def calcWToH(self, waist, height):
-        wtoh = waist/height
+        wtoh = float(waist)/float(height)
         return wtoh
 
     def calcOls(self, olsR, olsL):
