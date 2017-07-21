@@ -24,7 +24,6 @@ def dataImport(filename):
 #Hauptfunktion
 def main():
     calculation = Calculation()
-
     testData = dataImport('TestData.csv')
 
     for data in testData:
