@@ -67,7 +67,7 @@ class Calculation(object):
         point = 0
         vt = self.getValueTable(gender, age)
         for value in vt:
-            if (ssp) >= float(value['ssp']):
+            if float(ssp) >= float(value['ssp']):
                 point = value['point']
         return point
 
