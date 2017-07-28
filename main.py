@@ -16,20 +16,25 @@ from matplotlib.projections import register_projection
 from calculation import Calculation
 
 #Create LaTeX document
-def createDocument(filename, results):
+def createDocument(filename, documentResults):
     doc = Document('full')
-    imageFilename = os.path.join(os.path.dirname(__file__), 'plots/Janet_Meier.png')
-    with doc.create(Section('Fitnesstest Feuerwehr XY aktuelles Jahr')):
-        doc.append('Name')
-        doc.append(italic('italic text. '))
+    imageFilename = os.path.join(os.path.dirname(__file__), 'plots/Beni_Anliker.png')
+    with doc.create(Section('Leistungstest Feuerwehr Derendingen 2017', numbering=False)):
+        with doc.create(Subsection('Persönliche Daten', numbering=False)):
+            doc.append('Name ')
+            doc.append('\nAlter ')
+            doc.append('\nGrösse ')
 
-        with doc.create(Subsection('Resultate des neusten Fitnesstests')):
-            doc.append('Standweitsprung: ' + results['bmi'] )
+            doc.append(italic('\nitalic text. '))
 
-        with doc.create(Subsection('Spider Diagramm')):
+        with doc.create(Subsection('Aktuelle Testresultate', numbering=False)):
+            doc.append('Standweitsprung: ' + documentResults['slj'])
+            doc.append('\nGesamtpunktzahl Leistungstest: ' + documentResults['totalScore']  + ' von 125 Punkten = ' + documentResults['numberToLabel'])
+
+        with doc.create(Subsection('Längsschnittvergleich', numbering=False)):
             with doc.create(Figure(position = 'h!')) as diagram:
-                diagram.add_image(imageFilename, width = '120px')
-                diagram.add_caption('1 = Ungenügend, 2 = Genügend, 3 = Gut, 4 = Sehr gut, 5 = Hervorranged')
+                diagram.add_image(imageFilename, width = '350px')
+                diagram.add_caption('Beurteilung: 1 = Ungenügend, 2 = Genügend, 3 = Gut, 4 = Sehr gut, 5 = Hervorragend')
 
     #doc.generate_pdf(clean_tex=False)
     #doc.generate_tex()
@@ -49,8 +54,10 @@ def main():
     calculation = Calculation()
     testData = dataImport('TestData.csv')
     testResults = {
-        'bmi': '25',
-        'age': '23'
+        'slj': '25',
+        'age': '23',
+        'totalScore': '101',
+        'numberToLabel': 'Hervorragend',
     }
     createDocument(None,testResults)
 
