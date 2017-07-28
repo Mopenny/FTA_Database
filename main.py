@@ -5,6 +5,7 @@ import json
 import csv
 import numpy as np
 import pylatex
+import operator
 import matplotlib.pyplot as plt
 
 from pylatex import Document, Section, Subsection, Command, Figure
@@ -41,7 +42,9 @@ def dataImport(filename):
     with open(filename, 'rU') as csvfile:
         datareader = csv.DictReader(csvfile, delimiter=',')
         for row in datareader:
+            row['id'] = row['name'] + row['surname'] + row['dateOfBirth']
             data.append(row)
+    data.sort(key=operator.itemgetter('id'))
     return data
 
 
