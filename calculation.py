@@ -23,15 +23,15 @@ class Calculation(object):
         return age
 
     def calcBmi(self, weight, height):
-        bmi = float(weight)/((float(height)/100)**2)
+        bmi = round(float(weight)/((float(height)/100)**2), 2)
         return bmi
 
     def calcWToH(self, waist, height):
-        wtoh = float(waist)/float(height)
+        wtoh = round(float(waist)/float(height), 2)
         return wtoh
 
     def calcOls(self, olsR, olsL):
-        ols = float(olsR) + float(olsL)
+        ols = round(float(olsR) + float(olsL), 2)
         return ols
 
     def getValueTable(self, gender, age):
@@ -103,9 +103,9 @@ class Calculation(object):
     def numberToLabel(self, totalScore):
         ts = ''
         if totalScore <= 34:
-            ts = 'Ungenuegend'
+            ts = 'Ungenügend'
         elif totalScore >= 35 and totalScore <= 64:
-            ts = 'Genuegend'
+            ts = 'Genügend'
         elif totalScore >= 65 and totalScore <= 79:
             ts = 'Gut'
         elif totalScore >= 80 and totalScore <= 99:

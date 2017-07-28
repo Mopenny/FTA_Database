@@ -47,15 +47,74 @@ def dataImport(filename):
     with open(filename, 'rU') as csvfile:
         datareader = csv.DictReader(csvfile, delimiter=',')
         for row in datareader:
-            row['id'] = row['name'] + row['surname'] + row['dateOfBirth']
+            row['id'] = row['surname'] + row['name'] + row['dateOfBirth']
+            row['slj'] = round(float(row['slj']), 2)
+            row['ssp'] = round(float(row['ssp']), 2)
             data.append(row)
     data.sort(key=operator.itemgetter('id'))
     return data
 
 
 #Calculate per Person
-def calculate(data):
-    pass
+def calculate(personalData):
+    calculation = Calculation()
+    result = {
+        'years': []
+    }
+    personalData.sort(key=operator.itemgetter('year'))
+    personalData = personalData[-3:]
+    for data in personalData:
+        age = calculation.calcAge(data['testDate'], data['dateOfBirth'])
+        print('\n\n' + data['name'] + ' ' + data['surname'] + ' ' + str(age))
+        bmi = calculation.calcBmi(data['weight'], data['height'])
+        wtoh = calculation.calcWToH(data['waist'], data['height'])
+        ols = calculation.calcOls(data['olsR'], data['olsL'])
+        scorePerO = calculation.calcScorePer(data['gender'], age, data['perO'], 'perO')
+        scorePerI = calculation.calcScorePer(data['gender'], age, data['perI'], 'perI')
+        scoreTable = [
+            ('Standweitsprung', str(data['slj']) + ' m', calculation.calcScoreSlj(data['gender'], age, data['slj'])),
+            ('Medizinballstoss', str(data['ssp']) + ' m', calculation.calcScoreSsp(data['gender'], age, data['ssp'])),
+            ('Einbeinstand', str(ols) + ' s', calculation.calcScoreOls(data['gender'], age, ols)),
+            ('Globaler Rumpfkrafttest', data['tms'] + ' s', calculation.calcScoreTms(data['gender'], age, data['tms'])),
+            ('Progressiver Ausdauerlauf', data['perO'] + ' min:s', scorePerO) if scorePerI == 0 else ('20m Pendellauf', data['perI'] + ' min:s', scorePerI)
+        ]
+
+        #Berechnung Gesamtpunktzahl, Bewertung der Gesamtpunktzahl und Umrechnung der einzelnen Disziplinen für das Spider Diagramm
+        totalScore = 0
+        spiderScores = []
+        spiderScoreLabels = []
+        for score in scoreTable:
+            totalScore = totalScore + score[2]
+            if score[2] < 7:
+                spiderScores.append(1)
+            elif score[2] < 13:
+                spiderScores.append(2)
+            elif score[2] < 16:
+                spiderScores.append(3)
+            elif score[2] < 20:
+                spiderScores.append(4)
+            else:
+                spiderScores.append(5)
+            spiderScoreLabels.append(score[0])
+        numberToLabel = calculation.numberToLabel(totalScore)
+
+        result['id'] = data['id']
+        result['name'] =  data['name'] + ' ' + data['surname']
+        result['age'] =  str(age) + ' Jahre'
+        result['heigth'] = data['height'] + ' cm'
+        result['weight'] = data['weight'] + ' kg'
+        result['bmi'] = str(bmi) + ' kg/m^2'
+        result['wtoh'] = wtoh
+        result['scoreTable'] = scoreTable
+        result['totalScore'] = totalScore
+        result['numberToLabel'] = numberToLabel
+        result['years'].append({
+            'year': data['year'],
+            'spiderScoreLabels': spiderScoreLabels,
+            'spiderScores': spiderScores
+        })
+    return result
+
     #return dict with results
 
 #Create plot for person
@@ -64,65 +123,54 @@ def savePlot(data):
 
 #Hauptfunktion
 def main():
-    calculation = Calculation()
-    testData = dataImport('TestData.csv')
+
+    importedData = dataImport('TestData.csv')
     testResults = {
         'slj': '25',
         'age': '23',
         'totalScore': '101',
         'numberToLabel': 'Hervorragend',
     }
-    createDocument(None,testResults)
+    results = []
+    personalData = []
+    currentId = importedData[0]['id']
+    for row in importedData:
+        if(row['id'] != currentId):
+            formattedData = calculate(personalData)
+            results.append(formattedData)
+            personalData = []
+            currentId = row['id']
+        row['year'] = row['testDate'][-4:]
+        personalData.append(row)
 
-    for data in testData:
-        age = calculation.calcAge(data['testDate'], data['dateOfBirth'])
-        print('\n\n' + data['name'] + ' ' + data['surname'] + ' ' + str(age))
-        bmi = calculation.calcBmi(data['weight'], data['height'])
-        wtoh = calculation.calcWToH(data['waist'], data['height'])
-        ols = calculation.calcOls(data['olsR'], data['olsL'])
-        scorePerO = calculation.calcScorePer(data['gender'], age, data['perO'], 'perO')
-        scorePerI = calculation.calcScorePer(data['gender'], age, data['perI'], 'perI')
-        results = [
-            ('Standweitsprung', calculation.calcScoreSlj(data['gender'], age, data['slj'])),
-            ('Medizinballstoss', calculation.calcScoreSsp(data['gender'], age, data['ssp'])),
-            ('Einbeinstand', calculation.calcScoreOls(data['gender'], age, ols)),
-            ('Globaler Rumpfkrafttest', calculation.calcScoreTms(data['gender'], age, data['tms'])),
-            ('Progressiver Ausdauerlauf', scorePerO) if scorePerI == 0 else ('20m Pendellauf', scorePerI)
-        ]
 
-        #Berechnung Gesamtpunktzahl, Bewertung der Gesamtpunktzahl und Umrechnung der einzelnen Disziplinen für das Spider Diagramm
-        totalScore = 0
-        spiderScores = []
-        spiderScoreLabels = []
-        for score in results:
-            totalScore = totalScore + score[1]
-            if score[1] < 7:
-                spiderScores.append(1)
-            elif score[1] < 13:
-                spiderScores.append(2)
-            elif score[1] < 16:
-                spiderScores.append(3)
-            elif score[1] < 20:
-                spiderScores.append(4)
-            else:
-                spiderScores.append(5)
-            spiderScoreLabels.append(score[0])
-        numberToLabel = calculation.numberToLabel(totalScore)
+    print(results)
 
+    #createDocument(None,testResults)
+
+    for person in results:
         #Plotting Radar/Spider diagram
         N = 5
         penta = radar_factory(N, frame='polygon')
 
-        fig, axe = plt.subplots(figsize=(9, 9), nrows=1, ncols=1,
-                                 subplot_kw=dict(projection='radar'))
-
+        fig, axe = plt.subplots(figsize=(9, 9), nrows=1, ncols=1, subplot_kw=dict(projection='radar'))
 
         #for ax in axes:
-        axe.plot(penta, spiderScores, color='g')
-        axe.fill(penta, spiderScores, facecolor='g', alpha=0.25)
-        axe.set_varlabels(spiderScoreLabels)
+        colors = ['g', 'b', 'y']
+        for year, color in zip(person['years'], colors):
+            axe.plot(penta, year['spiderScores'], color=color)
+            axe.fill(penta, year['spiderScores'], facecolor=color, alpha=0.25)
+            axe.set_varlabels(year['spiderScoreLabels'])
         axe.set_rgrids([1, 2, 3, 4, 5])
-        plt.savefig('plots/' + data['name'] + '_' + data['surname'] + '.png')
+
+        #add legend relative to top-left plot
+        y = []
+        for year in person['years']:
+            y.append(year['year'])
+        legend = axe.legend(tuple(y), loc=(0.9, .95), labelspacing=0.1, fontsize='small')
+        fig.text(0.5, 0.965, '', horizontalalignment='center', color='black', weight='bold', size='large')
+        plt.savefig('plots/' + person['id'] + '.png')
+
 
 
 #Creation of the Rader/Spider diagram
