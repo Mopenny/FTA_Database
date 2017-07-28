@@ -44,6 +44,16 @@ def dataImport(filename):
             data.append(row)
     return data
 
+
+#Calculate per Person
+def calculate(data):
+    pass
+    #return dict with results
+
+#Create plot for person
+def savePlot(data):
+    pass
+
 #Hauptfunktion
 def main():
     calculation = Calculation()
