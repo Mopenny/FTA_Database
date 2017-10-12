@@ -115,8 +115,6 @@ def calculate(personalData):
         })
     return result
 
-    #return dict with results
-
 #Create plot for person
 def savePlot(data):
     pass
@@ -142,14 +140,11 @@ def main():
             currentId = row['id']
         row['year'] = row['testDate'][-4:]
         personalData.append(row)
-
-
     print(results)
 
-    #createDocument(None,testResults)
 
+    #Plotting Radar/Spider diagram
     for person in results:
-        #Plotting Radar/Spider diagram
         N = 5
         penta = radar_factory(N, frame='polygon')
 
@@ -163,7 +158,7 @@ def main():
             axe.set_varlabels(year['spiderScoreLabels'])
         axe.set_rgrids([1, 2, 3, 4, 5])
 
-        #add legend relative to top-left plot
+        #Add legend relative to top-left plot
         y = []
         for year in person['years']:
             y.append(year['year'])
